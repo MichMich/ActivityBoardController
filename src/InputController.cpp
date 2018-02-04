@@ -44,7 +44,9 @@ int InputController::sliderState(int min, int max) {
 void InputController::update()
 {
   int newState = _mcp.readGPIOAB();
-  if (newState != _lastState) {
+  int lastState = _lastState;
+  _lastState = newState; // We need to set the _lastState to the new state imideatly so we can request states in the callback.
+  if (newState != lastState) {
     boolean rotaryAState = (newState >> IC_ROTARY_A) & 1;
     boolean rotaryBState = (newState >> IC_ROTARY_B) & 1;
 
@@ -56,7 +58,7 @@ void InputController::update()
     // Check All Input
     for (byte buttonIndex = 0; buttonIndex < 16; buttonIndex++) {
       boolean newButtonState = (newState >> buttonIndex) & 1;
-      boolean oldButtonState = (_lastState >> buttonIndex) & 1;
+      boolean oldButtonState = (lastState >> buttonIndex) & 1;
 
       if (newButtonState != oldButtonState) {
         _buttonCallback(buttonIndex, !newButtonState);
@@ -64,7 +66,6 @@ void InputController::update()
     }
 
     _lastRotaryAState = rotaryAState;
-    _lastState = newState;
   }
 
   int newSliderState = analogRead(IC_SLIDER_PIN);

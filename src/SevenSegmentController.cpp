@@ -25,14 +25,19 @@ void SevenSegmentController::showNumber(long number, byte pos = 0) {
     }
 }
 
+void SevenSegmentController::setPowerState(boolean state)
+{
+  lc.shutdown(0, !state);
+}
+
 void SevenSegmentController::on()
 {
-  lc.shutdown(0,false);
+  setPowerState(true);
 }
 
 void SevenSegmentController::off()
 {
-  lc.shutdown(0,true); 
+  setPowerState(false);
 }
 
 void SevenSegmentController::clear()
@@ -42,7 +47,6 @@ void SevenSegmentController::clear()
 
 void SevenSegmentController::setup()
 {
-  lc.shutdown(0,false); // Disable the display's power save mode
   lc.setIntensity(0,15); // Set the display to full brightness
   lc.clearDisplay(0); // Clear the display
 }

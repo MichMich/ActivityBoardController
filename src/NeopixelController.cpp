@@ -15,9 +15,14 @@ void NeopixelController::setup()
     }
 }
 
+void NeopixelController::fadeArcadeButton(byte index)
+{
+    if (_tick % NC_ARCADE_FADESPEED == 0) _arcadeButtonIndicators[index].hue++;
+    illuminateArcadeButton(index);
+}
+
 void NeopixelController::illuminateArcadeButton(byte index)
 {
-    _arcadeButtonIndicators[index].hue++;
     _leds[NC_NUM_ROTARY_LEDS + index] = _arcadeButtonIndicators[index];
 }
 
@@ -27,7 +32,7 @@ void NeopixelController::rotateRotaryEncoderIndicator(boolean forward)
     _rotaryEncoderPosition += (forward) ? 1 : -1;
     _rotaryEncoderPosition = _rotaryEncoderPosition % NC_NUM_ROTARY_LEDS;
 
-    _rotaryEncoderIndicator.hue += NC_ROTARY_FADESPEED;
+    _rotaryEncoderIndicator.hue += (forward) ? NC_ROTARY_FADESPEED : -NC_ROTARY_FADESPEED;
     _leds[_rotaryEncoderPosition] = _rotaryEncoderIndicator;
 }
 
@@ -45,10 +50,16 @@ void NeopixelController::flashAllLights() {
     }
 }
 
-void NeopixelController::effectRun(int speed) {
+void NeopixelController::flashRotaryEncoder() {
+    for(byte i = 0; i < NC_NUM_ROTARY_LEDS; i++) {
+        _leds[i] = _rotaryEncoderIndicator;
+    }
+}
+
+void NeopixelController::effectRun(int speed, byte colorIndex) {
     if (_tick % speed == 0) {
         _pixel1 = (_pixel1 + 1) % NC_NUM_OUTER_LEDS;
-        _leds[NC_NUM_ROTARY_LEDS + NC_NUM_ARCADE_BUTTONS + _pixel1] += _arcadeButtonIndicators[1];
+        _leds[NC_NUM_ROTARY_LEDS + NC_NUM_ARCADE_BUTTONS + _pixel1] += _arcadeButtonIndicators[colorIndex];
     }   
 }
 
@@ -64,6 +75,13 @@ void NeopixelController::effectRandomRun(int speed) {
     }   
 }
 
+void NeopixelController::illuminateLogo()
+{
+    byte logoStart = 76;
+    for (byte led = logoStart; led < logoStart + 4; led++) {
+        _leds[led] = _rotaryEncoderIndicator;
+    } 
+}
 
 void NeopixelController::update()
 {
