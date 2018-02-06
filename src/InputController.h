@@ -2,7 +2,7 @@
 #include "Adafruit_MCP23017.h"
 
 #define IC_SLIDER_PIN A0
-#define IC_SLIDER_DENOISE_TIME 100
+#define IC_SLIDER_DENOISE_TIME 250
 
 #define IC_ARCADE_1 0
 #define IC_ARCADE_2 1
@@ -39,10 +39,11 @@ class InputController {
     void setSliderCallback(SliderCallback callback);
     boolean buttonState(byte buttonIndex);
     int sliderState();
+    unsigned int buttonState();
     int sliderState(int min, int max);
   
   private:
-    int _lastState = 0;
+    unsigned _lastState = 0;
     int _lastSliderState = 0;
     boolean _lastRotaryAState = true;
     Adafruit_MCP23017 _mcp;

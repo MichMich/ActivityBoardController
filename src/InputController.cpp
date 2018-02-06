@@ -41,10 +41,14 @@ int InputController::sliderState(int min, int max) {
   return map(sliderState(), 0, 1023, min, max);
 }
 
+unsigned InputController::buttonState() {
+  return _lastState;
+}
+
 void InputController::update()
 {
-  int newState = _mcp.readGPIOAB();
-  int lastState = _lastState;
+  unsigned newState = _mcp.readGPIOAB();
+  unsigned lastState = _lastState;
   _lastState = newState; // We need to set the _lastState to the new state imideatly so we can request states in the callback.
   if (newState != lastState) {
     boolean rotaryAState = (newState >> IC_ROTARY_A) & 1;

@@ -3,6 +3,7 @@
 #include "SevenSegmentController.h"
 #include "NeopixelController.h"
 #include "LedController.h"
+#include "CommunicationController.h"
 #include <elapsedMillis.h>
 
 #define AUTO_OFF_TIME 300000
@@ -11,8 +12,10 @@ InputController inputController;
 SevenSegmentController sevenSegmentController;
 NeopixelController neopixelController;
 LedController ledController;
+CommunicationController communicationController;
 
 elapsedMillis autoOffTimer;
+boolean autoOffTriggered = false;
 long tick = 0;
 long countDown = 99999999;
 
@@ -21,13 +24,24 @@ void rotaryCallback(boolean direction) {
 }
 
 void buttonCallback(byte buttonIndex, boolean state) {
-    autoOffTimer = 0;
+    if (autoOffTriggered) {
+        autoOffTimer = 0;
+        communicationController.sendCommand("auto_off", 0);
+        autoOffTriggered = false;
+    }
+
     sevenSegmentController.setPowerState(inputController.buttonState(IC_MAIN_SW_1));
+    communicationController.sendCommand("buttons", inputController.buttonState());  
 }
 
-void sliderCallback(int value) {}
+void sliderCallback(int value) {
+    communicationController.sendCommand("slider", inputController.sliderState());
+}
 
 void setup() {
+    communicationController.setup(115200);
+    communicationController.sendCommand("status", "booting");
+
     sevenSegmentController.setup();
     sevenSegmentController.off();
     neopixelController.setup();
@@ -36,6 +50,10 @@ void setup() {
     inputController.setRotaryCallback(rotaryCallback);
     inputController.setButtonCallback(buttonCallback);
     inputController.setSliderCallback(sliderCallback);
+
+    communicationController.setup(115200);
+    communicationController.sendCommand("status", "booted");
+    communicationController.sendCommand("auto_off", 0);
 }
 
 void arcadeButtonLoop() {
@@ -98,8 +116,12 @@ void loop() {
         rotaryEncoderLoop();
         ledLoop();
     } else {
-        sevenSegmentController.off();
-        ledController.off();
+        if (!autoOffTriggered) {
+            sevenSegmentController.off();
+            ledController.off();
+            communicationController.sendCommand("auto_off", 1);
+            autoOffTriggered = true;
+        }
     }
 
     neopixelController.update();
