@@ -38,9 +38,18 @@ void sliderCallback(int value) {
     communicationController.sendCommand("slider", inputController.sliderState());
 }
 
+void communicationCallback(String command, int value) {
+    if (autoOffTriggered) {
+        autoOffTimer = 0;
+        communicationController.sendCommand("auto_off", 0);
+        autoOffTriggered = false;
+    }
+}
+
 void setup() {
     communicationController.setup(115200);
     communicationController.sendCommand("status", "booting");
+    communicationController.setCommandCallback(communicationCallback);
 
     sevenSegmentController.setup();
     sevenSegmentController.off();
@@ -106,7 +115,10 @@ void ledLoop() {
 void loop() {
     tick++;
     countDown--;
+    if (countDown <= 0) countDown = 99999999;
+    
     inputController.update();
+    communicationController.update();
     if (autoOffTimer < AUTO_OFF_TIME) {
         if (tick % 10 == 0) sevenSegmentController.showNumber(countDown);
         mainSwitchLoop();

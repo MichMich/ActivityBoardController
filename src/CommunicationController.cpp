@@ -10,6 +10,13 @@ void CommunicationController::setup(unsigned long speed)
     Serial.begin(speed);
 }
 
+void CommunicationController::update()
+{
+    if (Serial.available()) {
+        _commandCallback("data", Serial.read());
+    }
+}
+
 void CommunicationController::setCommandCallback(CommandCallback callback)
 {
     _commandCallback = callback;
@@ -23,6 +30,7 @@ void CommunicationController::sendCommand(const char* command, unsigned int payl
     root[command] = payload;
 
     root.printTo(Serial);
+    Serial.println("");
 }
 
 void CommunicationController::sendCommand(const char* command, int payload)
@@ -33,6 +41,7 @@ void CommunicationController::sendCommand(const char* command, int payload)
     root[command] = payload;
 
     root.printTo(Serial);
+    Serial.println("");
 }
 
 void CommunicationController::sendCommand(const char* command, String payload)
@@ -43,4 +52,5 @@ void CommunicationController::sendCommand(const char* command, String payload)
     root[command] = payload;
 
     root.printTo(Serial);
+    Serial.println("");
 }
